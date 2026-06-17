@@ -23,6 +23,6 @@
     /* Важно: НЕ включаем "types": ["node"] */
     "types": ["vite/client", "@testing-library/jest-dom"]
   },
-  "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src"]
+  // "references": [{ "path": "./tsconfig.node.json" }]
 }
