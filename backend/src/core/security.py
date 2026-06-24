@@ -1,14 +1,10 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import bcrypt
-from authlib.jose import JsonWebSignature, JsonWebToken
-from authlib.jose.errors import BadSignatureError, ExpiredTokenError
+import jwt
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 
 from src.core.config import settings
-
-# Инициализация JWT
-jwt = JsonWebToken(["HS256"])
-jws = JsonWebSignature()
 
 
 def hash_password(password: str) -> str:
@@ -32,27 +28,24 @@ def create_access_token(
     to_encode = data.copy()
 
     if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+        expire = datetime.now(UTC) + expires_delta
     else:
-        expire = datetime.utcnow() + timedelta(
+        expire = datetime.now(UTC) + timedelta(
             minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
         )
 
-    to_encode.update({"exp": expire, "iat": datetime.utcnow()})
+    to_encode.update({"exp": expire, "iat": datetime.now(UTC)})
 
-    # Создаём заголовок и payload
-    header = {"alg": "HS256", "typ": "JWT"}
-
-    # Кодируем токен
-    token = jwt.encode(header, to_encode, settings.SECRET_KEY)
-    return token.decode("utf-8")
+    token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm="HS256")
+    return token
 
 
 def decode_token(token: str) -> dict:
     """Декодирует и валидирует JWT токен"""
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY)
-        payload.validate()
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
         return payload
-    except (BadSignatureError, ExpiredTokenError) as e:
+    except ExpiredSignatureError:
+        raise ValueError("Token expired") from None
+    except InvalidTokenError as e:
         raise ValueError(f"Invalid token: {str(e)}") from e

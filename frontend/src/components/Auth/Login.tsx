@@ -8,12 +8,12 @@ export const Login: React.FC = () => {
   const [error, setError] = useState("");
   const { login } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     const result = await login(username, password);
     if (!result.success) {
-      setError(result.error);
+      setError(result.error || "Login failed");
     }
   };
 

@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from src.api.routes import auth
+from src.api.routes import auth, chat
 from src.db.database import Base, engine
 
 # Создание таблиц
@@ -26,6 +26,7 @@ app.add_middleware(
 
 # Подключаем роуты
 app.include_router(auth.router)
+app.include_router(chat.router)
 
 
 @app.get("/")

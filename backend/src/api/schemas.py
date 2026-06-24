@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 
 class UserCreate(BaseModel):
@@ -22,5 +22,18 @@ class UserResponse(BaseModel):
     username: str
     email: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+
+class ChatRequest(BaseModel):
+    messages: list[dict[str, str]] = Field(..., description="История сообщений")
+    temperature: float = Field(0.7, ge=0.2, le=1.2)
+    max_tokens: int = Field(200, ge=50, le=500)
+    system_prompt: str = Field(
+        "Ты полезный ассистент. Отвечай кратко и по делу."
+    )
+
+
+class ChatMessage(BaseModel):
+    role: str  # "user" или "assistant"
+    content: str

@@ -10,7 +10,7 @@ export const Register: React.FC = () => {
   const [error, setError] = useState("");
   const { register } = useAuth();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
 
@@ -21,7 +21,7 @@ export const Register: React.FC = () => {
 
     const result = await register(username, email, password);
     if (!result.success) {
-      setError(result.error);
+      setError(result.error || "Register failed");
     }
   };
 

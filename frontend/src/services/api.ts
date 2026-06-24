@@ -59,4 +59,64 @@ export const authAPI = {
     api.post<LoginResponse>("/auth/login", { username, password }),
 };
 
+export interface ChatMessage {
+  role: "user" | "assistant" | "system";
+  content: string;
+}
+
+export interface ChatRequest {
+  messages: ChatMessage[];
+  temperature: number;
+  max_tokens: number;
+  system_prompt: string;
+}
+
+export const chatAPI = {
+  streamChatFetch: async function* (data: ChatRequest, token: string) {
+    const response = await fetch(`${API_BASE_URL}/chat/stream`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      throw new Error("No reader available");
+    }
+
+    const decoder = new TextDecoder();
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+
+      // Обработка SSE сообщений
+      const lines = buffer.split("\n\n");
+      buffer = lines.pop() || "";
+
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const jsonStr = line.slice(6);
+            const data = JSON.parse(jsonStr);
+            yield data;
+          } catch (e) {
+            console.error("Error parsing SSE data:", e);
+          }
+        }
+      }
+    }
+  },
+};
+
 export default api;
