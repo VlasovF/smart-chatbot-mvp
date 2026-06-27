@@ -59,6 +59,19 @@ export const authAPI = {
     api.post<LoginResponse>("/auth/login", { username, password }),
 };
 
+export interface OllamaModel {
+  name: string;
+  size: number;
+  modified_at: string;
+}
+
+export const modelsAPI = {
+  getModels: (token: string) =>
+    api.get<{ models: OllamaModel[] }>("/models", {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+};
+
 export interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
@@ -69,6 +82,7 @@ export interface ChatRequest {
   temperature: number;
   max_tokens: number;
   system_prompt: string;
+  model?: string;
 }
 
 export const chatAPI = {

@@ -1,11 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import { chatAPI, ChatMessage } from "../../services/api";
+import { chatAPI, ChatMessage, modelsAPI, OllamaModel } from "../../services/api";
 
 interface Settings {
   temperature: number;
   maxTokens: number;
   systemPrompt: string;
+  model: string;
 }
 
 export const ChatWindow: React.FC = () => {
@@ -14,6 +15,9 @@ export const ChatWindow: React.FC = () => {
   const [inputText, setInputText] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [availableModels, setAvailableModels] = useState<OllamaModel[]>([]);
+  const [loadingModels, setLoadingModels] = useState(false);
+  const modelsLoaded = useRef(false);
 
   // Настройки из localStorage
   const [settings, setSettings] = useState<Settings>(() => {
@@ -25,8 +29,31 @@ export const ChatWindow: React.FC = () => {
       temperature: 0.7,
       maxTokens: 200,
       systemPrompt: "Ты полезный ассистент. Отвечай кратко и по делу.",
+      model: "phi4-mini:3.8b",
     };
   });
+
+  const toggleSettings = async () => {
+    const newShowState = !showSettings;
+    setShowSettings(newShowState);
+
+    // Загружаем модели только при открытии и если ещё не загружены
+    if (newShowState && !modelsLoaded.current) {
+      setLoadingModels(true);
+      try {
+        const token = localStorage.getItem("access_token");
+        if (!token) return;
+
+        const response = await modelsAPI.getModels(token);
+        setAvailableModels(response.data.models);
+        modelsLoaded.current = true;
+      } catch (error) {
+        console.error("Failed to load models:", error);
+      } finally {
+        setLoadingModels(false);
+      }
+    }
+  };
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const controllerRef = useRef<AbortController | null>(null);
@@ -74,6 +101,7 @@ export const ChatWindow: React.FC = () => {
           temperature: settings.temperature,
           max_tokens: settings.maxTokens,
           system_prompt: settings.systemPrompt,
+          model: settings.model,
         },
         token
       );
@@ -149,7 +177,7 @@ export const ChatWindow: React.FC = () => {
       <div className="chat-header">
         <h2>🤖 Chat Bot</h2>
         <div className="header-actions">
-          <button onClick={() => setShowSettings(!showSettings)}>⚙️ Настройки</button>
+          <button onClick={toggleSettings}>⚙️ Настройки</button>
           <button onClick={clearHistory}>🗑️ Очистить</button>
           <button onClick={logout}>🚪 Выйти</button>
         </div>
@@ -158,6 +186,28 @@ export const ChatWindow: React.FC = () => {
       {/* Панель настроек */}
       {showSettings && (
         <div className="settings-panel">
+          <div className="setting-group">
+            <label>
+              Модель:
+              <select
+                value={settings.model}
+                onChange={(e) => updateSetting("model", e.target.value)}
+                disabled={loadingModels}
+              >
+                {loadingModels ? (
+                  <option>Загрузка...</option>
+                ) : availableModels.length > 0 ? (
+                  availableModels.map((model) => (
+                    <option key={model.name} value={model.name}>
+                      {model.name}
+                    </option>
+                  ))
+                ) : (
+                  <option value={settings.model}>{settings.model}</option>
+                )}
+              </select>
+            </label>
+          </div>
           <div className="setting-group">
             <label>
               Температура: {settings.temperature.toFixed(1)}
@@ -215,16 +265,7 @@ export const ChatWindow: React.FC = () => {
             </div>
           ))
         )}
-        {isGenerating &&
-          messages[messages.length - 1]?.role === "assistant" &&
-          messages[messages.length - 1]?.content === "" && (
-            <div className="message bot">
-              <div className="message-content">
-                <strong>🤖 Бот:</strong>
-                <span className="typing-indicator">...печатает</span>
-              </div>
-            </div>
-          )}
+
         <div ref={messagesEndRef} />
       </div>
 

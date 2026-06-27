@@ -30,6 +30,12 @@ async def stream_chat(
         # Получаем LLM клиент
         llm_client = get_llm_client()
 
+        # Если указана модель, пересоздаём клиент с ней
+        if request.model:
+            from src.llm.ollama import OllamaLLMClient
+
+            llm_client = OllamaLLMClient(model=request.model)
+
         logger.info(
             f"User {current_user.username} sent message. "
             f"Temperature: {request.temperature}, "

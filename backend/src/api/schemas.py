@@ -32,6 +32,7 @@ class ChatRequest(BaseModel):
     system_prompt: str = Field(
         "Ты полезный ассистент. Отвечай кратко и по делу."
     )
+    model: str | None = None
 
 
 class ChatMessage(BaseModel):
