@@ -6,7 +6,8 @@
         test test-security test-auth test-all \
         lint lint-backend lint-frontend \
         format format-backend format-frontend \
-        clean clean-docker clean-all
+        clean clean-docker clean-all \
+		test-integration test-ollama coverage-report
 
 # --- Переменные ---
 DOCKER_COMPOSE = docker compose
@@ -98,6 +99,19 @@ test-coverage: ## Запустить тесты с покрытием
 	@echo "$(GREEN)📊 Запуск тестов с покрытием...$(NC)"
 	$(DOCKER_COMPOSE) exec $(BACKEND_CONTAINER) pytest --cov=src --cov-report=html --cov-report=term $(PYTEST_ARGS)
 	@echo "$(GREEN)✅ Отчёт о покрытии создан в backend/htmlcov/index.html$(NC)"
+
+test-integration: ## Запустить интеграционные тесты
+	@echo "$(GREEN)🧪 Запуск интеграционных тестов...$(NC)"
+	$(DOCKER_COMPOSE) exec $(BACKEND_CONTAINER) pytest tests/ -m integration
+
+test-ollama: ## Запустить тесты Ollama
+	@echo "$(GREEN)🦙 Запуск тестов Ollama...$(NC)"
+	$(DOCKER_COMPOSE) exec $(BACKEND_CONTAINER) pytest tests/test_ollama.py -v
+
+coverage-report: ## Сгенерировать отчёт по покрытию
+	@echo "$(GREEN)📊 Генерация отчёта покрытия...$(NC)"
+	$(DOCKER_COMPOSE) exec $(BACKEND_CONTAINER) pytest --cov=src --cov-report=html --cov-report=term
+	@echo "$(GREEN)✅ Отчёт: backend/htmlcov/index.html$(NC)"
 
 # --- Линтеры ---
 lint: lint-backend lint-frontend ## Запустить все линтеры
