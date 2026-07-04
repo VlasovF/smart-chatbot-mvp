@@ -32,6 +32,7 @@ Backend API: http://localhost:8000/docs
 
 ## Структура
 
+```text
 smart-chatbot-mvp/
 ├── backend/              # FastAPI бэкенд
 │   ├── src/
@@ -51,10 +52,11 @@ smart-chatbot-mvp/
 ├── docker-compose.yml
 ├── Makefile
 └── .env.example
-
+```
 
 ## Архитектура
 
+```text
 ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
 │   React     │      │   FastAPI   │      │   Ollama    │
 │   + Vite    │◄────►│   + SQLite  │◄────►│   + SLM     │
@@ -63,3 +65,4 @@ smart-chatbot-mvp/
      │                      │                      │
      └───── JWT Auth ───────┘                      │
      └─────── SSE Streaming ───────────────────────┘
+```
