@@ -60,7 +60,7 @@ smart-chatbot-mvp/
 ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
 │   React     │      │   FastAPI   │      │   Ollama    │
 │   + Vite    │◄────►│   + SQLite  │◄────►│   + SLM     │
-│  (TypeScript)│      │   (Python)  │      │   (модель)  │
+│ (TypeScript)│      │   (Python)  │      │   (модель)  │
 └─────────────┘      └─────────────┘      └─────────────┘
      │                      │                      │
      └───── JWT Auth ───────┘                      │
