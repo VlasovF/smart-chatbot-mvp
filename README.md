@@ -2,6 +2,15 @@
 
 Асинхронное веб-приложение на **FastAPI + React + TypeScript** с авторизацией (JWT), стримингом ответов и поддержкой малых языковых моделей через **Ollama**.
 
+## Используемые технологии
+
+    Бэкенд: FastAPI, SQLAlchemy, Pydantic, PyJWT, bcrypt
+    Фронтенд: Reac, TypeScript, Vite, React Router
+    LLM: Ollama
+    Тестирование: pytest, Vitest, React Testing Library
+    Линтеры: ruff, ESLint, Prettier
+    Контейнеризация: Docker, Docker Compose
+
 ## Быстрый старт
 
 ### Требования
